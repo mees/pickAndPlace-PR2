@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<launch>
+
+  <node name="pick_and_place_demo" pkg="pick_and_place" type="pick_place_moveit" output="screen">
+    <param name="lenet_params_dir" value="$(find gpd)/lenet/15channels/params/"/>
+    <rosparam command="load" file="$(find pick_and_place)/config/gpd_default.yaml"/>
+  </node>
+
+</launch>

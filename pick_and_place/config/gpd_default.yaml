@@ -1,0 +1,62 @@
+# Hand geometry
+finger_width: 0.01
+hand_outer_diameter: 0.12
+hand_depth: 0.06
+hand_height: 0.02
+init_bite: 0.01
+
+# Classifier - grasp image
+image_outer_diameter: 0.09
+image_depth: 0.06
+image_height: 0.02
+image_size: 60
+image_num_channels: 15
+
+# Plotting
+plot_normals: false
+plot_samples: false
+plot_candidates: false
+plot_filtered_grasps: false
+plot_valid_grasps: false
+plot_clusters: false
+plot_selected_grasps: false
+rviz_topic: "grasps_rviz"
+
+# Preprocessing of point cloud
+voxelize: true
+remove_outliers: false
+workspace: [-1.0, 1.0, -1.0, 1.0, 0.1, 1.0] # Danger, gpd doesn't check bounds
+camera_position: [0, 0, 0]
+
+# General
+num_samples: 600
+num_threads: 10
+
+# Local grasp candidate search
+nn_radius: 0.01
+num_orientations: 8
+rotation_axis: 2 # Don't change this!
+
+# Filtering of grasps which are too low on (i.e. too close to) table
+filter_grasps: true # On workspace and robot hand aperture
+workspace_grasps: [-1.0, 1.0, -1.0, 1.0, 0.1, 1.0]
+filter_half_antipodal: false # On half antipodal
+
+# Grasp image creation
+create_image_batches: false # Not implemented in branch 'forward'. Creates grasp images in batches (less memory usage)
+remove_plane_before_image_calculation: false # Removes table plane from point cloud to speed up shadow computations
+
+# Clustering of grasps
+min_inliers: 1
+
+# Grasp selection
+min_score_diff: 0
+min_aperture: 0.029
+max_aperture: 0.072
+num_selected: 10
+
+filter_table_side_grasps: true
+table_height: 0.5
+# vertical_axis: [0, 0, 1] # Not in use
+# angle_thresh: 0.785 # Not in use
+# table_thresh: 0.05 # Not in use
