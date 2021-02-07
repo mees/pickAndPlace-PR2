@@ -2,3 +2,6 @@
 	path = gpd
 	url = git@github.com:mees/gpd.git
 	branch = forward
+[submodule "gpg"]
+	path = gpg
+	url = https://github.com/mees/gpg
