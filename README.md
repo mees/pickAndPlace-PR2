@@ -2,10 +2,12 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
 This repository enables to pick-and-place real-world tabletop objects by controlling a PR2 robot via [ROS](https://www.ros.org/) topics. 
-Concretely, the current implementation was used for picking-and-placing tabletops objects from natural language. 
+Concretely, the current implementation was used for picking-and-placing tabletops objects from natural language.
+More information at the [project page](http://speechrobot.cs.uni-freiburg.de/).
+
 The node in this repository assumes that a segmented point cloud of the object to be picked and the object placing location are being published on their respective ROS topics.
 Grasping of objects is done by predicting grasp poses with [GPD](https://arxiv.org/abs/1603.01564) and closing the gripper gently by leveraging [PR2's fingertip pressure sensors](http://wiki.ros.org/pr2_gripper_sensor_action).
-More information at the [project page](http://speechrobot.cs.uni-freiburg.de/).
+Motion planning is handled by [MoveIt](https://moveit.ros.org/). 
 
 <p align="center">
   <img src="http://speechrobot.cs.uni-freiburg.de/images/motivation.png" width="65%"/>
