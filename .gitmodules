@@ -1,0 +1,4 @@
+[submodule "gpd"]
+	path = gpd
+	url = git@github.com:mees/gpd.git
+	branch = forward
