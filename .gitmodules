@@ -1,7 +1,7 @@
-[submodule "gpd"]
-	path = grasping/gpd
-	url = git@github.com:mees/gpd.git
-	branch = forward
-[submodule "gpg"]
+[submodule "grasping/gpg"]
 	path = grasping/gpg
 	url = https://github.com/mees/gpg
+[submodule "grasping/gpd"]
+	path = grasping/gpd
+	url = https://github.com/mees/gpd
+	branch = forward
