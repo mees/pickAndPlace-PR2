@@ -6,13 +6,10 @@ namespace move_group_manager {
 MoveGroupManager::MoveGroupManager() {
   nh_.setCallbackQueue(&call_back_queue_);
   async_spinner_ptr_.reset(new ros::AsyncSpinner(0, &call_back_queue_));
-
   moveit::planning_interface::MoveGroup::Options options_arm("right_arm", "robot_description", nh_);
   group_ptr_.reset(new moveit::planning_interface::MoveGroup(options_arm));
-
   moveit::planning_interface::MoveGroup::Options options_right_gripper("right_gripper", "robot_description", nh_);
   right_gripper_ptr_.reset(new moveit::planning_interface::MoveGroup(options_right_gripper));
-
   group_ptr_->setGoalTolerance(0.01);
   // group_ptr_->setNumPlanningAttempts(3);
   group_ptr_->setPlanningTime(10.0);
@@ -23,9 +20,7 @@ bool MoveGroupManager::planCartesianPath(const std::vector<geometry_msgs::Pose>&
   moveit_msgs::RobotTrajectory trajectory;
   double fraction = group_ptr_->computeCartesianPath(poses, 0.01, 0.0, trajectory);
   plan.trajectory_ = trajectory;
-
   bool result = this->plan(plan);
-
   return result;
 }
 
@@ -34,10 +29,8 @@ bool MoveGroupManager::plan(const std::string& frame_id, const std::string& eef_
   geometry_msgs::PoseStamped pose_stamped;
   pose_stamped.header.frame_id = frame_id;
   pose_stamped.pose = pose;
-
   group_ptr_->setPoseTarget(pose_stamped, eef_link);
   bool result = this->plan(plan);
-
   return result;
 }
 
@@ -45,7 +38,6 @@ bool MoveGroupManager::plan(moveit::planning_interface::MoveGroup::Plan& plan) {
   async_spinner_ptr_->start();
   bool result = group_ptr_->plan(plan);
   async_spinner_ptr_->stop();
-
   return result;
 }
 
@@ -53,13 +45,11 @@ bool MoveGroupManager::execute(const moveit::planning_interface::MoveGroup::Plan
   async_spinner_ptr_->start();
   bool result = group_ptr_->execute(plan);
   async_spinner_ptr_->stop();
-
   return result;
 }
 
 int MoveGroupManager::pick(const geometry_msgs::Pose& grasp_pose, const geometry_msgs::Vector3& approach) {
   moveit_msgs::Grasp grasp;
-
   grasp.grasp_pose.header.frame_id = "odom_combined";
   grasp.grasp_pose.pose = grasp_pose;
 
@@ -115,7 +105,6 @@ int MoveGroupManager::pick(const geometry_msgs::Pose& grasp_pose, const geometry
   group_ptr_->setSupportSurfaceName("table");
   moveit_msgs::MoveItErrorCodes result = group_ptr_->pick("object", grasp);
   async_spinner_ptr_->stop();
-
   return result.val;
 }
 
@@ -155,11 +144,9 @@ int MoveGroupManager::place(const geometry_msgs::Pose& pose) {
 
   std::vector<moveit_msgs::PlaceLocation> locations;
   locations.push_back(location);
-
   geometry_msgs::PoseStamped ps;
   ps.header.frame_id = "odom_combined";
   ps.pose = pose;
-
   async_spinner_ptr_->start();
   group_ptr_->setSupportSurfaceName("box");
   moveit_msgs::MoveItErrorCodes result = group_ptr_->place("object", ps);
@@ -176,7 +163,6 @@ void MoveGroupManager::openGripper() {
   values["r_gripper_r_finger_joint"] = 0.477;
   values["r_gripper_r_finger_tip_joint"] = 0.477;
   values["r_gripper_l_finger_tip_joint"] = 0.477;
-
   async_spinner_ptr_->start();
   right_gripper_ptr_->setJointValueTarget(values);
   right_gripper_ptr_->move();

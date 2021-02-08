@@ -8,10 +8,8 @@ namespace table_detection {
 TableDetection::TableDetection() : nh_private_("~"), tf_listener_(tf_buffer_) {
   float cb_arr[] = {0.0, 2.0, -1.0, 1.0, 0.1, 1.0};
   std::vector<float> crop_box_default(cb_arr, cb_arr + sizeof(cb_arr) / sizeof(float));
-
   float uv_arr[] = {0.0, 0.0, 1.0};
   std::vector<float> up_vector_default(uv_arr, uv_arr + sizeof(uv_arr) / sizeof(float));
-
   nh_private_.param<std::string>("frame_id", frame_id_, "odom_combined");
   nh_private_.param<bool>("detect_continuous", detect_continuous_, false);
   nh_private_.param<float>("voxel_grid_size", voxel_grid_size_, 0.01);
@@ -21,16 +19,13 @@ TableDetection::TableDetection() : nh_private_("~"), tf_listener_(tf_buffer_) {
   nh_private_.param<float>("inlier_thresh", inlier_thresh_, 0.02);
   nh_private_.param<int>("min_cluster_size", min_cluster_size_, 100);
   nh_private_.param<float>("cluster_tolerance", cluster_tolerance_, 0.04);
-
   cloud_ptr_.reset(new pcl::PointCloud<pcl::PointXYZRGB>());
   cloud_filtered_ptr_.reset(new pcl::PointCloud<pcl::PointXYZRGB>());
   cloud_bounds_ptr_.reset(new pcl::PointCloud<pcl::PointXYZRGB>());
   inlier_ptr_.reset(new pcl::PointIndices());
   object_cloud.reset(new pcl::PointCloud<pcl::PointXYZRGB>());
-
   rviz_visualizer_ptr_.reset(new rviz_visualizer::RvizVisualizer(frame_id_, "markers", nh_private_));
   rviz_visualizer_ptr_->setAlpha(0.5);
-
   pub_cloud_ = nh_public_.advertise<pcl::PointCloud<pcl::PointXYZRGB> >("debug", 10);
   model_coeff_pub = nh_public_.advertise<pcl_msgs::ModelCoefficients>("model_coeff_pub", 1);
 }
@@ -38,7 +33,6 @@ TableDetection::TableDetection() : nh_private_("~"), tf_listener_(tf_buffer_) {
 void TableDetection::run(const std::string& topic) {
   ROS_INFO("[%s]: Subscribe to topic '%s'.", name().c_str(), topic.c_str());
   sub_cloud_ = nh_public_.subscribe<sensor_msgs::PointCloud2>(topic, 1, &TableDetection::cloudCallback, this);
-
   if (sub_cloud_.getNumPublishers() == 0)
     ROS_WARN("[%s]: No publishers for topic '%s' detected.", name().c_str(), topic.c_str());
 }
@@ -47,12 +41,10 @@ void TableDetection::stop() { sub_cloud_.shutdown(); }
 
 void TableDetection::detect(const sensor_msgs::PointCloud2& cloud_msg) {
   pcl::fromROSMsg(cloud_msg, *cloud_ptr_);
-
   if (cloud_ptr_->empty()) {
     ROS_WARN("[%s]: Point cloud is empty.", name().c_str());
     return;
   }
-
   inlier_ptr_->indices.clear();
   inlier_ptr_->header = cloud_ptr_->header;
   // outlier_ptr_->indices.clear();

@@ -17,18 +17,12 @@ class MoveGroupManager {
 
   bool planCartesianPath(const std::vector<geometry_msgs::Pose>& poses,
                          moveit::planning_interface::MoveGroup::Plan& plan);
-
   bool plan(const std::string& frame_id, const std::string& eef_link, const geometry_msgs::Pose& pose,
             moveit::planning_interface::MoveGroup::Plan& plan);
-
   bool plan(moveit::planning_interface::MoveGroup::Plan& plan);
-
   bool execute(const moveit::planning_interface::MoveGroup::Plan& plan);
-
   int pick(const geometry_msgs::Pose& grasp_pose, const geometry_msgs::Vector3& approach);
-
   int place(const geometry_msgs::Pose& pose);
-
   void openGripper();
 
  private:

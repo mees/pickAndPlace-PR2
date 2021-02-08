@@ -16,39 +16,32 @@ PlanningSceneManager::PlanningSceneManager() {
 void PlanningSceneManager::allowCollision(const std::string& id) {
   moveit_msgs::AllowedCollisionMatrix acm;
   getAllowedCollisionMatrix(acm);
-
   if (find(acm.entry_names, id) >= acm.entry_names.size()) {
     expandAllowedCollisionMatrix(acm, id);
-
     acm.default_entry_names.push_back(id);
     acm.default_entry_values.push_back(true);
   } else {
     size_t index = find(acm.default_entry_names, id);
-
     if (index >= acm.default_entry_names.size()) {
       acm.default_entry_names.push_back(id);
       acm.default_entry_values.push_back(true);
     } else
       acm.default_entry_values.at(index) = true;
   }
-
   moveit_msgs::PlanningScene scene;
   scene.allowed_collision_matrix = acm;
-
   applyPlanningScene(scene);
 }
 
 bool PlanningSceneManager::getCollisionObject(const std::string& object_id, moveit_msgs::CollisionObject& object) {
   std::vector<moveit_msgs::CollisionObject> objects;
   getCollisionObjects(objects);
-
   for (size_t i = 0; i < objects.size(); i++) {
     if (objects[i].id == object_id) {
       object = objects[i];
       return true;
     }
   }
-
   ROS_WARN("[%s::%s]: Could not find '%s' in planning scene.", ns().c_str(), name().c_str(), object_id.c_str());
   return false;
 }
@@ -58,14 +51,11 @@ void PlanningSceneManager::addBoxCollisionObject(const std::string& frame_id, co
   moveit_msgs::CollisionObject object;
   initHeader(ros::Time::now(), frame_id, object.header);
   object.id = object_id;
-
   object.primitives.resize(1);
   std::vector<double> dims(dimensions.data(), dimensions.data() + dimensions.size());
   initSolidPrimitive(shape_msgs::SolidPrimitive::BOX, dims, object.primitives[0]);
-
   object.primitive_poses.resize(1);
   tf::poseEigenToMsg(pose, object.primitive_poses[0]);
-
   addCollisionObject(object);
 }
 
@@ -74,15 +64,12 @@ void PlanningSceneManager::addSphereCollisionObject(const std::string& frame_id,
   moveit_msgs::CollisionObject object;
   initHeader(ros::Time::now(), frame_id, object.header);
   object.id = object_id;
-
   object.primitives.resize(1);
   std::vector<double> dims;
   dims.push_back(radius);
   initSolidPrimitive(shape_msgs::SolidPrimitive::SPHERE, dims, object.primitives[0]);
-
   object.primitive_poses.resize(1);
   tf::poseEigenToMsg(pose, object.primitive_poses[0]);
-
   addCollisionObject(object);
 }
 
@@ -91,7 +78,6 @@ void PlanningSceneManager::removeCollisionObject(const std::string& frame_id, co
   object.header.frame_id = frame_id;
   object.id = object_id;
   object.operation = moveit_msgs::CollisionObject::REMOVE;
-
   addCollisionObject(object);
 }
 
@@ -100,7 +86,6 @@ bool PlanningSceneManager::getAllowedCollisionMatrix(moveit_msgs::AllowedCollisi
   srv.request.components.components = moveit_msgs::PlanningSceneComponents::ALLOWED_COLLISION_MATRIX;
   bool result = client_get_scene_.call(srv);
   acm = srv.response.scene.allowed_collision_matrix;
-
   return result;
 }
 
@@ -109,7 +94,6 @@ bool PlanningSceneManager::getCollisionObjects(std::vector<moveit_msgs::Collisio
   srv.request.components.components = moveit_msgs::PlanningSceneComponents::WORLD_OBJECT_GEOMETRY;
   bool result = client_get_scene_.call(srv);
   objects = srv.response.scene.world.collision_objects;
-
   return result;
 }
 
@@ -117,7 +101,6 @@ void PlanningSceneManager::applyPlanningScene(const moveit_msgs::PlanningScene& 
   moveit_msgs::ApplyPlanningScene srv;
   srv.request.scene = scene;
   srv.request.scene.is_diff = true;
-
   client_apply_scene_.call(srv);
 }
 
@@ -126,7 +109,6 @@ void PlanningSceneManager::expandAllowedCollisionMatrix(moveit_msgs::AllowedColl
   for (size_t i = 0; i < acm.entry_names.size(); i++) acm.entry_values[i].enabled.push_back(value);
 
   acm.entry_names.push_back(name);
-
   moveit_msgs::AllowedCollisionEntry entry;
   entry.enabled.assign(acm.entry_names.size(), value);
   acm.entry_values.push_back(entry);
@@ -135,7 +117,6 @@ void PlanningSceneManager::expandAllowedCollisionMatrix(moveit_msgs::AllowedColl
 void PlanningSceneManager::addCollisionObject(const moveit_msgs::CollisionObject& object) {
   moveit_msgs::PlanningScene scene;
   scene.world.collision_objects.push_back(object);
-
   applyPlanningScene(scene);
 }
 
