@@ -52,16 +52,12 @@
 typedef actionlib::SimpleActionClient <pr2_controllers_msgs::PointHeadAction> PointHeadClient;
 PointHeadClient *point_head_client_;
 
-
 using namespace std;
 boost::shared_ptr <moveit::planning_interface::MoveGroup> right_gripper_ptr_;
 
-
 void pCallback(const geometry_msgs::PointStampedConstPtr &p_msg, geometry_msgs::PointStamped &point_out) {
-    // cout<<p_msg->point.x<<", "<<p_msg->point.y<<", "<<p_msg->point.z<<", "<<endl;
     point_out = *p_msg;
 }
-
 
 bool place(planning_scene_manager::PlanningSceneManager scene_mgr,
            move_group_manager::MoveGroupManager &group_mgr, geometry_msgs::PointStamped placing_point,
@@ -83,10 +79,8 @@ bool place(planning_scene_manager::PlanningSceneManager scene_mgr,
         group_mgr.openGripperGently();
     } else
         ROS_WARN("Place object failed.");
-
     scene_mgr.removeCollisionObject("r_wist_roll_link", "object");
     scene_mgr.removeCollisionObject("odom_combined", "object");
-
     return success;
 }
 
@@ -98,7 +92,6 @@ bool LoadRobotStateFromStorage(std::string &state_id, moveit::core::RobotState &
         return false;
     }
     moveit::core::robotStateMsgToRobotState(*state_msg, state);
-
     return true;
 }
 
@@ -137,14 +130,12 @@ void lookAt(std::string frame_id, double x, double y, double z) {
 
 bool moveToInitState(moveit::planning_interface::MoveGroup &arm_group, moveit::core::RobotState &robot_state) {
     std::string state_id = "twoTableView4";
-
     if (!LoadRobotStateFromStorage(state_id, robot_state)) {
         ROS_ERROR("Can't load robot state");
         return false;
     } else {
         ROS_INFO("Loaded init robot state");
     }
-
     ROS_INFO("Moving robot head");
     lookAt("odom_combined", 3.0, -3.0, -7);
     usleep(50000);
@@ -175,8 +166,6 @@ bool moveToPlacingState(moveit::planning_interface::MoveGroup &arm_group, moveit
     } else {
         ROS_INFO("Loaded init robot state");
     }
-
-
 // Move the arm.
     arm_group.setJointValueTarget(robot_state);
     moveit::planning_interface::MoveGroup::Plan my_plan;
@@ -197,7 +186,6 @@ bool moveToPlacingState(moveit::planning_interface::MoveGroup &arm_group, moveit
 
 void set_gpd_params(ros::NodeHandle &nh, const moveit_msgs::CollisionObject &table) {
     const double THRESH = 0.02;
-
     geometry_msgs::Pose table_pose = table.primitive_poses.at(0);
     std::vector<double> table_dims = table.primitives.at(0).dimensions;
     std::vector<double> workspace(6);
@@ -207,7 +195,6 @@ void set_gpd_params(ros::NodeHandle &nh, const moveit_msgs::CollisionObject &tab
     workspace[3] = table_pose.position.y + 0.5 * table_dims[1];
     workspace[4] = table_pose.position.z - 0.5 * table_dims[2] - THRESH;
     workspace[5] = table_pose.position.z + 1.0;
-
     nh.setParam("workspace", workspace);
     nh.setParam("workspace_grasps", workspace);
     nh.setParam("table_height", table.primitive_poses.at(0).position.z);
@@ -220,7 +207,6 @@ bool transform_cloud(const pcl::PointCloud <pcl::PointXYZRGB> &cloud_in,
     try {
         geometry_msgs::TransformStamped transform_msg = tf_buffer.lookupTransform(
                 frame_id, cloud_in.header.frame_id, pcl_conversions::fromPCL(cloud_in.header.stamp));
-
         transform = tf2::transformToEigen(transform_msg);
         pcl::transformPointCloud(cloud_in, cloud_out, transform);
     }
@@ -229,7 +215,6 @@ bool transform_cloud(const pcl::PointCloud <pcl::PointXYZRGB> &cloud_in,
         ROS_WARN("%s", ex.what());
         return false;
     }
-
     return true;
 }
 
@@ -244,22 +229,17 @@ bool detect_grasps2Cams(const Eigen::Vector3d &view_point, const Eigen::Vector3d
 {
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_ptr(new pcl::PointCloud <pcl::PointXYZRGBA>);
     pcl::copyPointCloud(cloud, *cloud_ptr);
-
     Eigen::Matrix3Xd view_points(3, 2);
     view_points.col(0) = view_point;
     view_points.col(1) = view_point2;
-
     int cloud_size = 0;
     CloudCamera cloud_camera(cloud_ptr, cloud_size, view_points);
-
     grasp_detector.preprocessPointCloud(cloud_camera);
     grasps = grasp_detector.detectGrasps(cloud_camera);
-
     if (grasps.empty()) {
         ROS_WARN("Could not detect any grasps.");
         return false;
     }
-
     return true;
 }
 
@@ -267,14 +247,11 @@ bool detect_grasps(const Eigen::Vector3d &view_point, const pcl::PointCloud <pcl
                    GraspDetector &grasp_detector, std::vector <Grasp> &grasps) {
     pcl::PointCloud<pcl::PointXYZRGBA>::Ptr cloud_ptr(new pcl::PointCloud <pcl::PointXYZRGBA>);
     pcl::copyPointCloud(cloud, *cloud_ptr);
-
     Eigen::Matrix3Xd view_points(3, 1);
     view_points.col(0) = view_point;
     CloudCamera cloud_camera(cloud_ptr, 0, view_points);
-
     grasp_detector.preprocessPointCloud(cloud_camera);
     grasps = grasp_detector.detectGrasps(cloud_camera);
-
     if (grasps.empty()) {
         ROS_WARN("Could not detect any grasps.");
         return false;
@@ -292,23 +269,18 @@ bool grasp(planning_scene_manager::PlanningSceneManager scene_mgr,
         Eigen::Affine3d grasp_pose = Eigen::Affine3d::Identity();
         grasp_pose.translation() = -0.14 * grasps[i].getApproach() + grasps[i].getGraspBottom();
         grasp_pose.linear() << grasps[i].getApproach(), grasps[i].getBinormal(), grasps[i].getAxis();
-
         geometry_msgs::Pose grasp_pose_msg;
         tf::poseEigenToMsg(grasp_pose, grasp_pose_msg);
-
         geometry_msgs::Vector3 approach_msg;
         tf::vectorEigenToMsg(grasps[i].getApproach(), approach_msg);
-
         scene_mgr.addSphereCollisionObject("odom_combined", "object", object_pose, 0.10);
         scene_mgr.allowCollision("object");
-
         if (group_mgr.pickGently(grasp_pose_msg, approach_msg)) {
             return true;
         } else {
             scene_mgr.removeCollisionObject("r_wist_roll_link", "object");
             scene_mgr.removeCollisionObject("odom_combined", "object");
         }
-
     }
 
     ROS_WARN("Tried all grasps without success.");
@@ -325,12 +297,9 @@ int main(int argc, char **argv) {
     ros::Subscriber p_sub = node_handle.subscribe<geometry_msgs::PointStamped>("placing_pose_pub", 1,
                                                                                boost::bind(pCallback, _1,
                                                                                            boost::ref(placing_point)));
-
     pcl::PointCloud <pcl::PointXYZRGB> cloud;
     ros::Subscriber sub_cloud = node_handle.subscribe<sensor_msgs::PointCloud2>(
             "refexp_object", 1, boost::bind(callback_cloud, _1, boost::ref(cloud)));
-
-
     ros::Publisher display_publisher = node_handle.advertise<moveit_msgs::DisplayTrajectory>(
             "/move_group/display_planned_path", 1, true);
     ros::Publisher placing_pose_pub = node_handle.advertise<geometry_msgs::PointStamped>("placing_pose", 1);
@@ -344,16 +313,13 @@ int main(int argc, char **argv) {
     tf2_ros::TransformListener tf_listener(tf_buffer);
     bool use_gpd = true;
     moveit_msgs::CollisionObject table;
-
     planning_scene_manager::PlanningSceneManager scene_mgr;
     move_group_manager::MoveGroupManager group_mgr;
-
     planning_scene_monitor::PlanningSceneMonitorPtr psm_ptr = planning_scene_monitor::PlanningSceneMonitorPtr(
             new planning_scene_monitor::PlanningSceneMonitor("robot_description"));
     boost::shared_ptr <moveit::planning_interface::MoveGroup> arm_group(
             new moveit::planning_interface::MoveGroup("arms"));
     arm_group->setPoseReferenceFrame(base_frame_id);
-
     if (!scene_mgr.getCollisionObject("table", table))
         return EXIT_FAILURE;
     geometry_msgs::Pose table_pose = table.primitive_poses.at(0);
@@ -369,7 +335,6 @@ int main(int argc, char **argv) {
     while (!point_head_client_->waitForServer(ros::Duration(5.0))) {
         ROS_INFO("Waiting for the point_head_action server to come up");
     }
-
     ros::Duration(1.0).sleep();
     bool grasp_cmd_recv = false;
     bool place_cmd_recv = false;
@@ -380,7 +345,6 @@ int main(int argc, char **argv) {
     moveit::core::RobotState robot_state(psm_ptr->getRobotModel());
     moveToInitState(*arm_group, robot_state);
     group_mgr.openGripperGently();
-
     while (ros::ok()) {
         ROS_INFO("Wait for new picking object cloud ...");
         ros::Time time = ros::Time::now();
@@ -420,7 +384,6 @@ int main(int argc, char **argv) {
                 ros::Duration(1.0).sleep();
                 continue;
             }
-
             if (use_gpd) {
                 std_msgs::Bool msg_pick;
                 msg_pick.data = false;
@@ -472,7 +435,6 @@ int main(int argc, char **argv) {
 
                 rate.sleep();
             }
-
             std_msgs::Bool msg1;
             msg1.data = false;
             //transform points to odom_combined
@@ -504,7 +466,6 @@ int main(int argc, char **argv) {
                     bool success = place(scene_mgr, group_mgr, placing_point_transformed, display_trajectory,
                                          display_publisher);
                     psm_ptr->requestPlanningSceneState();
-
                     if (success) {
                         moveit::core::RobotState robot_state(psm_ptr->getRobotModel());
                         if (!moveToInitState(*arm_group, robot_state)) {
@@ -516,7 +477,6 @@ int main(int argc, char **argv) {
                         goal_reached_pub.publish(msg1);
 
                     }
-
                 } else {
                     goal_reached_pub.publish(msg1);
                 }
@@ -527,5 +487,4 @@ int main(int argc, char **argv) {
         }
         rate.sleep();
     }
-
 }
