@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<launch>
+  <arg name="topic_in"/>
+
+  <node name="table_detection" pkg="table_detection" type="table_detection_node" output="screen">
+    <param name="topic_in" value="$(arg topic_in)"/>
+    <rosparam command="load" file="$(find table_detection)/config/default.yaml"/>
+  </node>
+
+</launch>
