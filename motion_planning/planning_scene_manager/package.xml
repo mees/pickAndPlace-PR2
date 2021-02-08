@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<package>
+
+  <name>planning_scene_manager</name>
+  <version>0.0.1</version>
+  <description>The planning_scene_manager package.</description>
+
+  <maintainer email="meeso@informatik.uni-freiburg.de">Oier Mees</maintainer>
+  <author email="hauffn@informatik.uni-freiburg.de">Nico Hauff</author>
+  <author email="eitel@cs.uni-freiburg.de">Andreas Eitel</author>
+  <license>BSD</license>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>moveit_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
+  <build_depend>shape_msgs</build_depend>
+  <build_depend>eigen_conversions</build_depend>
+  <build_depend>libeigen3-dev</build_depend>
+  
+  <run_depend>roscpp</run_depend>
+  <run_depend>std_msgs</run_depend>
+  <run_depend>roscpp</run_depend>
+  <run_depend>moveit_msgs</run_depend>
+  <run_depend>geometry_msgs</run_depend>
+  <run_depend>shape_msgs</run_depend>
+  <run_depend>eigen_conversions</run_depend>
+  <run_depend>libeigen3-dev</run_depend>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+</package>
