@@ -1,0 +1,4 @@
+int32 u
+int32 v
+---
+geometry_msgs/PointStamped pixel3d
