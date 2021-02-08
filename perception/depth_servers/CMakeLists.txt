@@ -6,22 +6,10 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
-  tf
-  tf_conversions
   cv_bridge
   sensor_msgs
   geometry_msgs
   message_generation
-  moveit_core
-  moveit_ros_planning
-  moveit_ros_planning_interface
-  pluginlib
-  geometric_shapes
-  moveit_visual_tools
-  planning_scene_manager
-  move_group_manager
-  moveit_ros_warehouse
-  planning_scene_manager
   pcl_conversions
 )  
 
@@ -39,7 +27,6 @@ link_directories(${PCL_LIBRARY_DIRS})
    FILES
    depth_server.srv
    mask2pcl_server.srv
-   #point2pcl_server.srv
  )
 ## Generate added messages and services with any dependencies listed here
  generate_messages(
@@ -50,8 +37,7 @@ link_directories(${PCL_LIBRARY_DIRS})
  )
 
 catkin_package(
-  CATKIN_DEPENDS roscpp std_msgs sensor_msgs message_runtime moveit_core
-    moveit_ros_planning_interface planning_scene_manager move_group_manager moveit_ros_warehouse
+  CATKIN_DEPENDS roscpp std_msgs sensor_msgs message_runtime
 )
 
 ###########
@@ -65,10 +51,8 @@ include_directories(include ${Boost_INCLUDE_DIRS}
 ## Declare a C++ executable
 add_executable(depth_server  src/depth_server.cpp)
 add_executable(mask2pcl_server  src/mask2pcl_server.cpp)
-add_executable(point2pcl_server  src/point2pcl_server.cpp)
 
 ## Specify libraries to link a library or executable target against
 target_link_libraries(depth_server   ${catkin_LIBRARIES} ${boost_LIBRARIES} ${PCL_LIBRARIES})
 target_link_libraries(mask2pcl_server   ${catkin_LIBRARIES} ${boost_LIBRARIES} ${PCL_LIBRARIES})
-target_link_libraries(point2pcl_server   ${catkin_LIBRARIES} ${boost_LIBRARIES} ${PCL_LIBRARIES})
 
