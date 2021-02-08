@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package>
+
+  <name>rviz_visualizer</name>
+  <version>0.0.0</version>
+  <description>The rviz_visualizer package.</description>
+
+  <maintainer email="meeso@informatik.uni-freiburg.de">Oier Mees</maintainer>
+  <author email="hauffn@informatik.uni-freiburg.de">Nico Hauff</author>
+  <author email="eitel@cs.uni-freiburg.de">Andreas Eitel</author>
+  <license>BSD</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>cmake_modules</build_depend>
+  <build_depend>roscpp</build_depend>
+  
+  <run_depend>roscpp</run_depend>
+
+</package>
