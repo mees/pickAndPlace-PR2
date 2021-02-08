@@ -1,8 +1,7 @@
 #include <planning_scene_manager/planning_scene_manager.h>
 #include <ros/ros.h>
 
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
   ros::init(argc, argv, "add_collision_box");
   ros::NodeHandle nh_public, nh_private("~");
 

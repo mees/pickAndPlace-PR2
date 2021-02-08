@@ -1,42 +1,34 @@
-#include <planning_scene_manager/planning_scene_manager.h>
-#include <moveit_msgs/PlanningScene.h>
-#include <moveit_msgs/ApplyPlanningScene.h>
 #include <eigen_conversions/eigen_msg.h>
+#include <moveit_msgs/ApplyPlanningScene.h>
+#include <moveit_msgs/PlanningScene.h>
+#include <planning_scene_manager/planning_scene_manager.h>
 
 // http://docs.ros.org/indigo/api/moveit_msgs/html/msg/PlanningSceneComponents.html
 // http://docs.ros.org/api/moveit_msgs/html/msg/PlanningScene.html
 
-namespace planning_scene_manager
-{
+namespace planning_scene_manager {
 
-PlanningSceneManager::PlanningSceneManager()
-{
+PlanningSceneManager::PlanningSceneManager() {
   client_get_scene_ = nh_.serviceClient<moveit_msgs::GetPlanningScene>("get_planning_scene");
   client_apply_scene_ = nh_.serviceClient<moveit_msgs::ApplyPlanningScene>("apply_planning_scene");
 }
 
-void PlanningSceneManager::allowCollision(const std::string& id)
-{
+void PlanningSceneManager::allowCollision(const std::string& id) {
   moveit_msgs::AllowedCollisionMatrix acm;
   getAllowedCollisionMatrix(acm);
 
-  if (find(acm.entry_names, id) >= acm.entry_names.size())
-  {
+  if (find(acm.entry_names, id) >= acm.entry_names.size()) {
     expandAllowedCollisionMatrix(acm, id);
 
     acm.default_entry_names.push_back(id);
     acm.default_entry_values.push_back(true);
-  }
-  else
-  {
+  } else {
     size_t index = find(acm.default_entry_names, id);
 
-    if (index >= acm.default_entry_names.size())
-    {
+    if (index >= acm.default_entry_names.size()) {
       acm.default_entry_names.push_back(id);
       acm.default_entry_values.push_back(true);
-    }
-    else
+    } else
       acm.default_entry_values.at(index) = true;
   }
 
@@ -46,16 +38,12 @@ void PlanningSceneManager::allowCollision(const std::string& id)
   applyPlanningScene(scene);
 }
 
-bool PlanningSceneManager::getCollisionObject(const std::string& object_id,
-  moveit_msgs::CollisionObject& object)
-{
+bool PlanningSceneManager::getCollisionObject(const std::string& object_id, moveit_msgs::CollisionObject& object) {
   std::vector<moveit_msgs::CollisionObject> objects;
   getCollisionObjects(objects);
 
-  for (size_t i = 0; i < objects.size(); i++)
-  {
-    if (objects[i].id == object_id)
-    {
+  for (size_t i = 0; i < objects.size(); i++) {
+    if (objects[i].id == object_id) {
       object = objects[i];
       return true;
     }
@@ -65,9 +53,8 @@ bool PlanningSceneManager::getCollisionObject(const std::string& object_id,
   return false;
 }
 
-void PlanningSceneManager::addBoxCollisionObject(const std::string& frame_id,
-  const std::string& object_id, const Eigen::Affine3d& pose, const Eigen::Vector3d& dimensions)
-{
+void PlanningSceneManager::addBoxCollisionObject(const std::string& frame_id, const std::string& object_id,
+                                                 const Eigen::Affine3d& pose, const Eigen::Vector3d& dimensions) {
   moveit_msgs::CollisionObject object;
   initHeader(ros::Time::now(), frame_id, object.header);
   object.id = object_id;
@@ -82,9 +69,8 @@ void PlanningSceneManager::addBoxCollisionObject(const std::string& frame_id,
   addCollisionObject(object);
 }
 
-void PlanningSceneManager::addSphereCollisionObject(const std::string& frame_id,
-  const std::string& object_id, const Eigen::Affine3d& pose, double radius)
-{
+void PlanningSceneManager::addSphereCollisionObject(const std::string& frame_id, const std::string& object_id,
+                                                    const Eigen::Affine3d& pose, double radius) {
   moveit_msgs::CollisionObject object;
   initHeader(ros::Time::now(), frame_id, object.header);
   object.id = object_id;
@@ -100,9 +86,7 @@ void PlanningSceneManager::addSphereCollisionObject(const std::string& frame_id,
   addCollisionObject(object);
 }
 
-void PlanningSceneManager::removeCollisionObject(const std::string& frame_id,
-  const std::string& object_id)
-{
+void PlanningSceneManager::removeCollisionObject(const std::string& frame_id, const std::string& object_id) {
   moveit_msgs::CollisionObject object;
   object.header.frame_id = frame_id;
   object.id = object_id;
@@ -111,8 +95,7 @@ void PlanningSceneManager::removeCollisionObject(const std::string& frame_id,
   addCollisionObject(object);
 }
 
-bool PlanningSceneManager::getAllowedCollisionMatrix(moveit_msgs::AllowedCollisionMatrix& acm)
-{
+bool PlanningSceneManager::getAllowedCollisionMatrix(moveit_msgs::AllowedCollisionMatrix& acm) {
   moveit_msgs::GetPlanningScene srv;
   srv.request.components.components = moveit_msgs::PlanningSceneComponents::ALLOWED_COLLISION_MATRIX;
   bool result = client_get_scene_.call(srv);
@@ -121,8 +104,7 @@ bool PlanningSceneManager::getAllowedCollisionMatrix(moveit_msgs::AllowedCollisi
   return result;
 }
 
-bool PlanningSceneManager::getCollisionObjects(std::vector<moveit_msgs::CollisionObject>& objects)
-{
+bool PlanningSceneManager::getCollisionObjects(std::vector<moveit_msgs::CollisionObject>& objects) {
   moveit_msgs::GetPlanningScene srv;
   srv.request.components.components = moveit_msgs::PlanningSceneComponents::WORLD_OBJECT_GEOMETRY;
   bool result = client_get_scene_.call(srv);
@@ -131,8 +113,7 @@ bool PlanningSceneManager::getCollisionObjects(std::vector<moveit_msgs::Collisio
   return result;
 }
 
-void PlanningSceneManager::applyPlanningScene(const moveit_msgs::PlanningScene& scene)
-{
+void PlanningSceneManager::applyPlanningScene(const moveit_msgs::PlanningScene& scene) {
   moveit_msgs::ApplyPlanningScene srv;
   srv.request.scene = scene;
   srv.request.scene.is_diff = true;
@@ -141,10 +122,8 @@ void PlanningSceneManager::applyPlanningScene(const moveit_msgs::PlanningScene& 
 }
 
 void PlanningSceneManager::expandAllowedCollisionMatrix(moveit_msgs::AllowedCollisionMatrix& acm,
-  const std::string& name, bool value)
-{
-  for (size_t i = 0; i < acm.entry_names.size(); i++)
-    acm.entry_values[i].enabled.push_back(value);
+                                                        const std::string& name, bool value) {
+  for (size_t i = 0; i < acm.entry_names.size(); i++) acm.entry_values[i].enabled.push_back(value);
 
   acm.entry_names.push_back(name);
 
@@ -153,33 +132,28 @@ void PlanningSceneManager::expandAllowedCollisionMatrix(moveit_msgs::AllowedColl
   acm.entry_values.push_back(entry);
 }
 
-void PlanningSceneManager::addCollisionObject(const moveit_msgs::CollisionObject& object)
-{
+void PlanningSceneManager::addCollisionObject(const moveit_msgs::CollisionObject& object) {
   moveit_msgs::PlanningScene scene;
   scene.world.collision_objects.push_back(object);
 
   applyPlanningScene(scene);
 }
 
-void PlanningSceneManager::initHeader(const ros::Time& stamp, const std::string& frame_id,
-  std_msgs::Header& header)
-{
+void PlanningSceneManager::initHeader(const ros::Time& stamp, const std::string& frame_id, std_msgs::Header& header) {
   header.stamp = stamp;
   header.frame_id = frame_id;
 }
 
-void PlanningSceneManager::initSolidPrimitive(const int& type,
-  const std::vector<double>& dimensions, shape_msgs::SolidPrimitive& primitive)
-{
+void PlanningSceneManager::initSolidPrimitive(const int& type, const std::vector<double>& dimensions,
+                                              shape_msgs::SolidPrimitive& primitive) {
   primitive.type = type;
   primitive.dimensions = dimensions;
 }
 
-size_t PlanningSceneManager::find(const std::vector<std::string>& vector, const std::string& string)
-{
+size_t PlanningSceneManager::find(const std::vector<std::string>& vector, const std::string& string) {
   size_t index = std::find(vector.begin(), vector.end(), string) - vector.begin();
 
   return index;
 }
 
-}
+}  // namespace planning_scene_manager
