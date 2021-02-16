@@ -5,7 +5,7 @@ find_package(catkin REQUIRED COMPONENTS
   cmake_modules
   roscpp
   eigen_conversions
-
+  pr2_gripper_sensor_action
   moveit_ros_planning_interface
 )
 

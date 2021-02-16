@@ -12,16 +12,25 @@ MoveGroupManager::MoveGroupManager() {
   right_gripper_ptr_.reset(new moveit::planning_interface::MoveGroup(options_right_gripper));
   group_ptr_->setGoalTolerance(0.01);
   // group_ptr_->setNumPlanningAttempts(3);
-  group_ptr_->setPlanningTime(10.0);
+  group_ptr_->setPlanningTime(1.0);
+  grab_client_ptr_.reset(new GrabClient("r_gripper_sensor_controller/grab", true));
+  while (!grab_client_ptr_->waitForServer(ros::Duration(5.0)))
+    ROS_INFO("Waiting for the r_gripper_sensor_controller/grab action server to come up.");
+
+  release_client_ptr_.reset(new ReleaseClient("r_gripper_sensor_controller/release", true));
+  while (!release_client_ptr_->waitForServer(ros::Duration(5.0)))
+    ROS_INFO("Waiting for the r_gripper_sensor_controller/release action server to come up.");
 }
 
 bool MoveGroupManager::planCartesianPath(const std::vector<geometry_msgs::Pose>& poses,
                                          moveit::planning_interface::MoveGroup::Plan& plan) {
   moveit_msgs::RobotTrajectory trajectory;
-  double fraction = group_ptr_->computeCartesianPath(poses, 0.01, 0.0, trajectory);
+  double fraction = group_ptr_->computeCartesianPath(poses, 0.02, 0.0, trajectory);
   plan.trajectory_ = trajectory;
-  bool result = this->plan(plan);
-  return result;
+  ROS_WARN("Cartesian plan accuracy: %.2f", fraction);
+  if (fraction > 0.95) return true;
+
+  return false;
 }
 
 bool MoveGroupManager::plan(const std::string& frame_id, const std::string& eef_link, const geometry_msgs::Pose& pose,
@@ -108,6 +117,35 @@ int MoveGroupManager::pick(const geometry_msgs::Pose& grasp_pose, const geometry
   return result.val;
 }
 
+bool MoveGroupManager::pickGently(const geometry_msgs::Pose& grasp_pose, const geometry_msgs::Vector3& approach) {
+  geometry_msgs::Pose approach_pose = grasp_pose;
+  approach_pose.position.x += -0.2 * approach.x;
+  approach_pose.position.y += -0.2 * approach.y;
+  approach_pose.position.z += -0.2 * approach.z;
+  moveit::planning_interface::MoveGroup::Plan pre_approach_plan;
+  if (!plan("odom_combined", "r_wrist_roll_link", approach_pose, pre_approach_plan)) return false;
+
+  if (!execute(pre_approach_plan)) return false;
+
+  moveit::planning_interface::MoveGroup::Plan grasp_plan;
+  std::vector<geometry_msgs::Pose> grasp_poses;
+  grasp_poses.push_back(approach_pose);
+  grasp_poses.push_back(grasp_pose);
+
+  if (!planCartesianPath(grasp_poses, grasp_plan)) return false;
+  if (!execute(grasp_plan)) return false;
+  if (!closeGripperGently()) return false;
+
+  moveit::planning_interface::MoveGroup::Plan retreat_plan;
+  geometry_msgs::Pose retreat_pose = group_ptr_->getCurrentPose().pose;
+  retreat_pose.position.z += 0.2;
+
+  if (!plan("odom_combined", "r_wrist_roll_link", retreat_pose, retreat_plan)) return false;
+  if (!execute(retreat_plan)) return false;
+
+  return true;
+}
+
 int MoveGroupManager::place(const geometry_msgs::Pose& pose) {
   moveit_msgs::PlaceLocation location;
 
@@ -167,8 +205,34 @@ void MoveGroupManager::openGripper() {
   right_gripper_ptr_->setJointValueTarget(values);
   right_gripper_ptr_->move();
   async_spinner_ptr_->stop();
-
   group_ptr_->detachObject("object");
+}
+bool MoveGroupManager::openGripperGently() {
+  pr2_gripper_sensor_msgs::PR2GripperReleaseGoal goal;
+  goal.command.event.trigger_conditions = goal.command.event.FINGER_SIDE_IMPACT_OR_SLIP_OR_ACC;
+  goal.command.event.acceleration_trigger_magnitude = 0;
+  goal.command.event.slip_trigger_magnitude = 0;
+  ROS_INFO("Send goal to open the gripper.");
+  release_client_ptr_->sendGoal(goal);
+  release_client_ptr_->waitForResult(ros::Duration(20.0));
+  if (release_client_ptr_->getState() != actionlib::SimpleClientGoalState::SUCCEEDED) {
+    ROS_ERROR("Failed to open the gripper.");
+    return false;
+  }
+  return true;
+}
+
+bool MoveGroupManager::closeGripperGently() {
+  pr2_gripper_sensor_msgs::PR2GripperGrabGoal goal;
+  goal.command.hardness_gain = 0.03;
+  ROS_INFO("Send goal to close the gripper.");
+  grab_client_ptr_->sendGoal(goal);
+  grab_client_ptr_->waitForResult(ros::Duration(20.0));
+  if (grab_client_ptr_->getState() != actionlib::SimpleClientGoalState::SUCCEEDED) {
+    ROS_ERROR("Failed to close the gripper.");
+    return false;
+  }
+  return true;
 }
 
 }  // namespace move_group_manager

@@ -45,12 +45,12 @@ roslaunch pick_and_place pick_and_place.launch
 #### Subscribed topics
 The `pick_and_place` node subscribes to the following topics:
 
-*  `/refexp_object (sensor_msgs::PointCloud2)`: segmented point cloud of the object to be picked in the camera frame
-* `/placing_pose_pub (geometry_msgs::PointStamped)`: location on which the picked object should be placed in the camera frame
+*  `/refexp_object (sensor_msgs::PointCloud2)` segmented point cloud of the object to be picked in the camera frame
+* `/placing_pose_pub (geometry_msgs::PointStamped)` location on which the picked object should be placed in the camera frame
 
 #### Published topics
 The `pick_and_place` node publishes to the following topics:
 
-*  `/placing_pose (geometry_msgs::PointStamped>)`: location on which the picked object will be placed on the global frame, for visualization purposes
-*  `/placing_pose_reached (std_msgs::Bool>)`: boolean indicating if the placing pose was reached
-*  `/picking_reached_pub (std_msgs::Bool>)`: boolean indicating if the grasping pose was reached
+*  `/placing_pose (geometry_msgs::PointStamped>)` location on which the picked object will be placed on the global frame, for visualization purposes
+*  `/placing_pose_reached (std_msgs::Bool>)` boolean indicating if the placing pose was reached
+*  `/picking_reached_pub (std_msgs::Bool>)` boolean indicating if the grasping pose was reached
